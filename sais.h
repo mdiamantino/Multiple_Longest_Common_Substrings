@@ -9,12 +9,14 @@
  */
 class SuffixArray {
 public:
-    static const int _alphabet_size = 256;
     std::vector<int> &_suffix_array;
     std::vector<int> _text;
+    const int _alphabet_size;
 
-    SuffixArray(std::vector<int> &suffixArray, std::vector<int> text) : _suffix_array(suffixArray),
-                                                                         _text(std::move(text)) { sa_is(); }
+    SuffixArray(std::vector<int> &suffixArray, std::vector<int> text, int alphabet_size) :
+            _suffix_array(suffixArray),
+            _text(std::move(text)),
+            _alphabet_size(alphabet_size) { sa_is(); }
 
 
 private:

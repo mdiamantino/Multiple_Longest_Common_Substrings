@@ -85,13 +85,10 @@ public:
         std::set<int> types_in_current_window;
         initialize_text_properties();
         build_combined_shifted_text();
-        SuffixArray sa(_sarray, _combined_text);
+        SuffixArray sa(_sarray, _combined_text, _alphabet_length);
 
         std::vector<int> lcp_array = longest_common_prefix_from_suffix_array(_combined_text, _sarray);
 
-//        for (auto elem : lcp_array) {
-//            std::cout << elem << std::endl;
-//        }
 
         int lowest_index = _n_sentinels, highest_index = lowest_index;
         SlidingWindow sliding_window(lcp_array, lowest_index + 1, highest_index + 1);
