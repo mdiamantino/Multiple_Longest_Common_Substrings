@@ -7,6 +7,7 @@
 #include <set>
 #include <unordered_map>
 #include <stack>
+#include <iostream>
 #include "sais.h"
 #include "longestCommonPrefix.h"
 #include "SlidingWindow.h"
