@@ -1,6 +1,5 @@
 #include <vector>
 #include "MultipleLongestCommonSubstring.h"
-#include "sais.h"
 
 int main() {
     std::vector<std::vector<char>> texts;
