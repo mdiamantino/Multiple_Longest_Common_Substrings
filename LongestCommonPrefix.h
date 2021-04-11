@@ -3,7 +3,7 @@
 
 // http://web.cs.iastate.edu/~cs548/references/linear_lcp.pdf
 template<typename T>
-std::vector<int> longest_common_prefix_from_suffix_array(const std::vector <T> &word, const std::vector<T> &suffix_array) {
+std::vector<int> ComputeLongestCommonPrefix(const std::vector <T> &word, const std::vector<T> &suffix_array) {
     int number_of_suffixes = suffix_array.size();
     // Building inverse of the suffix array
     std::vector<int> rank(number_of_suffixes, 0);

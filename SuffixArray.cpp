@@ -4,7 +4,7 @@
 
 #include "SuffixArray.h"
 
-void SuffixArray::sa_is() {
+void SuffixArray::PerformSAIS() {
     int n = _text.size();
 
     // Scan S once to classify all the characters as L- or S-type into type;
@@ -21,14 +21,14 @@ void SuffixArray::sa_is() {
     // Scan type once to find all the LMS-substrings in S into lms;
     std::vector<int> lms;
     for (int i = 0; i < n; ++i) {
-        if (is_lms(type, i)) lms.emplace_back(i);
+        if (IsLMS(type, i)) lms.emplace_back(i);
     }
     int nlms = lms.size();
 
     // Induced sort all the LMS-substrings using lms and bucket;
-    induced_sort(type, lms);
+    PerformInducedSort(type, lms);
     for (int i = 0, cnt = 0; cnt != nlms && i < n; ++i) {
-        if (is_lms(type, _suffix_array[i])) _suffix_array[cnt++] = _suffix_array[i];
+        if (IsLMS(type, _suffix_array[i])) _suffix_array[cnt++] = _suffix_array[i];
     }
     _suffix_array.resize(nlms);
 
@@ -41,8 +41,8 @@ void SuffixArray::sa_is() {
         bool same = i != 0;
         for (int j = 1; same; ++j) {
             if (_text[p + j] != _text[q + j]) same = false;
-            if (!is_lms(type, p + j) && !is_lms(type, q + j)) continue;
-            if (!is_lms(type, p + j) && !is_lms(type, q + j)) same = false;
+            if (!IsLMS(type, p + j) && !IsLMS(type, q + j)) continue;
+            if (!IsLMS(type, p + j) && !IsLMS(type, q + j)) same = false;
             break;
         }
         if (!same) ++name;
@@ -61,44 +61,44 @@ void SuffixArray::sa_is() {
     if (k1 == nlms) {
         for (int i = 0; i < k1; ++i) sa1[s1[i]] = i;
     } else {
-        sa_is();
+        PerformSAIS();
     }
     for (int &idx : sa1) idx = lms[idx];
 
     // Induce SA from SA1
-    induced_sort(type, sa1);
+    PerformInducedSort(type, sa1);
 }
 
-bool SuffixArray::is_lms(const std::vector<bool> &type, int idx) {
+bool SuffixArray::IsLMS(const std::vector<bool> &type, int idx) {
     return idx > 0 && type[idx] && !type[idx - 1];
 }
 
-void SuffixArray::calc_bucket(std::vector<int> &bucket) {
+void SuffixArray::ComputeBucket(std::vector<int> &bucket) {
     bucket.assign(_alphabet_size, 0);
     for (int ch : _text) ++bucket[ch];
     for (int i = 0; i < _alphabet_size - 1; ++i) bucket[i + 1] += bucket[i];
 }
 
-void SuffixArray::induced_sort(const std::vector<bool> &type, const std::vector<int> &lms) {
+void SuffixArray::PerformInducedSort(const std::vector<bool> &type, const std::vector<int> &lms) {
     int n = _text.size();
     _suffix_array.resize(n);
     _suffix_array.assign(n, -1);
 
     std::vector<int> bucket(_alphabet_size);
 
-    calc_bucket(bucket);
+    ComputeBucket(bucket);
     for (auto it = lms.rbegin(); it != lms.rend(); ++it) {
         _suffix_array[--bucket[_text[*it]]] = *it;
     }
 
-    calc_bucket(bucket);
+    ComputeBucket(bucket);
     for (int i = 0; i < n; ++i) {
         if (!(_suffix_array[i] == -1 || _suffix_array[i] == 0 || type[_suffix_array[i] - 1])) {
             _suffix_array[bucket[_text[_suffix_array[i] - 1] - 1]++] = _suffix_array[i] - 1;
         }
     }
 
-    calc_bucket(bucket);
+    ComputeBucket(bucket);
     for (int i = n - 1; i >= 0; --i) {
         if (!(_suffix_array[i] == -1 || _suffix_array[i] == 0 || !type[_suffix_array[i] - 1])) {
             _suffix_array[--bucket[_text[_suffix_array[i] - 1]]] = _suffix_array[i] - 1;

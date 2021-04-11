@@ -15,7 +15,7 @@ public:
                                                                                   _lowest_value(lowestValue),
                                                                                   _highest_value(highestValue) {}
 
-    void advance() {
+    void AdvanceWindow() {
         while (!_window_deque.empty() && _lcp_array[_window_deque.back()] > _lcp_array[_highest_value]) {
             _window_deque.pop_back();
         }
@@ -23,12 +23,12 @@ public:
         _highest_value++; // Increase the window size
     }
 
-    void shrink() {
+    void ShrinkWindow() {
         _lowest_value++; // Decrease window size by pushing it forward
         while (!_window_deque.empty() && _window_deque.front() < _lowest_value) _window_deque.pop_front();
     }
 
-    int get_min() {
+    int ExtractMin() {
         return _lcp_array[_window_deque.front()];
     }
 };

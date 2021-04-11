@@ -17,16 +17,16 @@ public:
     SuffixArray(std::vector<int> &suffixArray, std::vector<int> text, int alphabet_size) :
             _suffix_array(suffixArray),
             _text(std::move(text)),
-            _alphabet_size(alphabet_size) { sa_is(); }
+            _alphabet_size(alphabet_size) { PerformSAIS(); }
 
 private:
-    void sa_is();
+    void PerformSAIS();
 
-    static bool is_lms(const std::vector<bool> &type, int idx);
+    static bool IsLMS(const std::vector<bool> &type, int idx);
 
-    void calc_bucket(std::vector<int> &bucket);
+    void ComputeBucket(std::vector<int> &bucket);
 
-    void induced_sort(const std::vector<bool> &type, const std::vector<int> &lms);
+    void PerformInducedSort(const std::vector<bool> &type, const std::vector<int> &lms);
 
 };
 

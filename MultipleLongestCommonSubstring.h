@@ -8,9 +8,9 @@
 #include <unordered_map>
 #include <stack>
 #include <iostream>
-#include "SuffixArray.h"
-#include "longestCommonPrefix.h"
+#include "LongestCommonPrefix.h"
 #include "SlidingWindow.h"
+#include "SAIS2.h"
 
 template<typename T>
 class MultipleLongestCommonSubstr {
@@ -25,13 +25,10 @@ private:
     int _k = 2;
     std::vector<int> _sarray{};
     std::vector<int> _combined_text;
-    std::unordered_map<int, int> type_from_char_pos;
+    std::unordered_map<int, int> _type_from_char_pos;
     std::vector<std::tuple<int, int>> _longest_comon_substrings_indices;
 
-public:
-    explicit MultipleLongestCommonSubstr(std::vector<std::vector<T>> v) : _files_arrays(std::move(v)) {}
-
-    void initialize_text_properties() {
+    void InitializeTextProperties() {
         std::set<T> char_map;
         _n_sentinels = _files_arrays.size();
         for (int i = 0, char_type = 0; i < _n_sentinels; i++) {
@@ -40,9 +37,9 @@ public:
             _text_length += curr_txt_size;
             for (int c = 0; c < curr_txt_size; c++) {
                 char_map.insert(curr_txt[c]);
-                type_from_char_pos[char_type++] = i;
+                _type_from_char_pos[char_type++] = i;
             }
-            type_from_char_pos[char_type++] = i;
+            _type_from_char_pos[char_type++] = i;
         }
         _text_length += _n_sentinels; // Total text length also include sentinels (Eg. {ab,er,zer} -> ab$er!zer&)
         _alphabet_length = (int) char_map.size() + _n_sentinels;
@@ -50,7 +47,7 @@ public:
         _shift = _n_sentinels - _min_symbol_value;
     }
 
-    void build_combined_shifted_text() {
+    void BuildCombinedText() {
         int i;
         for (i = 0; i < _n_sentinels; i++) {
             for (auto &chr : _files_arrays[i]) {
@@ -60,34 +57,27 @@ public:
         }
     }
 
-    bool enoughUniqueColorsInWindow(std::set<int> &types_in_current_window, int lowest_index, int highest_index) {
+    bool IsKDifferentTypesInWindow(std::set<int> &types_in_current_window, int lowest_index, int highest_index) {
         types_in_current_window.clear();
         for (int i = lowest_index; i <= highest_index; i++) {
-            types_in_current_window.insert(type_from_char_pos[_sarray[i]]);
+            types_in_current_window.insert(_type_from_char_pos[_sarray[i]]);
         }
         return types_in_current_window.size() == _k;
     }
 
-    void print_results() {
-        for (std::tuple<int, int> indices : _longest_comon_substrings_indices) {
-            std::vector<char> word;
-            word.reserve(std::get<1>(indices));
-            int i = _sarray[std::get<0>(indices)];
-            for (int j = 0; j < std::get<1>(indices); j++) {
-                word.push_back((char) (_combined_text[i + j] - _shift));
-            }
-            std::string string(word.begin(), word.end());
-            std::cout << string << std::endl;
-        }
-    }
-
-    void solve() {
+    void FindMostCommonSubStrings() {
         std::set<int> types_in_current_window;
-        initialize_text_properties();
-        build_combined_shifted_text();
-        SuffixArray sa(_sarray, _combined_text, _alphabet_length);
+        InitializeTextProperties();
+        BuildCombinedText();
+//        std::ofstream fout("/home/mdc/CLionProjects/logest_common_substring/combined.txt", std::ios::out | std::ios::binary);
+//        fout.write(reinterpret_cast<const char*>(&_combined_text[0]), _combined_text.size() * sizeof(char));
+//        fout.close();
+//        int* SA = static_cast<int *>(malloc(sizeof(int *) * _text_length));
+//        SA_IS(reinterpret_cast<unsigned char *>(&_combined_text[0]),SA,_text_length,_k,sizeof(unsigned char));
+        _sarray = sais_suffix_array(_combined_text, _alphabet_length);
+//        SuffixArray sa(_sarray, _combined_text, _alphabet_length);
 
-        std::vector<int> lcp_array = longest_common_prefix_from_suffix_array(_combined_text, _sarray);
+        std::vector<int> lcp_array = ComputeLongestCommonPrefix(_combined_text, _sarray);
 
 
         int lowest_index = _n_sentinels, highest_index = lowest_index;
@@ -96,18 +86,18 @@ public:
         while (true) {
             bool shrinkWindow =
                     highest_index == _text_length - 1 ||
-                    enoughUniqueColorsInWindow(types_in_current_window, lowest_index, highest_index);
+                    IsKDifferentTypesInWindow(types_in_current_window, lowest_index, highest_index);
             if (shrinkWindow) {
-                sliding_window.shrink();
+                sliding_window.ShrinkWindow();
                 lowest_index++;
             } else {
-                sliding_window.advance();
+                sliding_window.AdvanceWindow();
                 highest_index++;
             }
             if (lowest_index == _text_length - 1) break;
             if (lowest_index != highest_index ||
-                !enoughUniqueColorsInWindow(types_in_current_window, lowest_index, highest_index)) {
-                int min_lcp = sliding_window.get_min();
+                !IsKDifferentTypesInWindow(types_in_current_window, lowest_index, highest_index)) {
+                int min_lcp = sliding_window.ExtractMin();
                 if (min_lcp > 0) {
                     if (min_lcp > current_longest_length) {
                         // A new longest string, hence we do not need previous anymore !
@@ -120,6 +110,25 @@ public:
                     }
                 }
             }
+        }
+    }
+
+public:
+    explicit MultipleLongestCommonSubstr(const std::vector<std::vector<T>> &v) : _files_arrays(std::move(v)) {
+        FindMostCommonSubStrings();
+    }
+
+
+    void PrintResults() {
+        for (std::tuple<int, int> indices : _longest_comon_substrings_indices) {
+            std::vector<char> word;
+            word.reserve(std::get<1>(indices));
+            int i = _sarray[std::get<0>(indices)];
+            for (int j = 0; j < std::get<1>(indices); j++) {
+                word.push_back((char) (_combined_text[i + j] - _shift));
+            }
+            std::string string(word.begin(), word.end());
+            std::cout << string << std::endl;
         }
     }
 };

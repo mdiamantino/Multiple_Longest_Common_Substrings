@@ -1,5 +1,5 @@
 #include <vector>
-#include "MultipleLongestCommonSubstring.h"
+#include "FileLCSWrapper.h"
 
 int main() {
     std::vector<std::vector<char>> texts;
@@ -20,9 +20,9 @@ int main() {
     std::vector<char> word4(w4.begin(), w4.end());
     texts.push_back(word4);
 
-    MultipleLongestCommonSubstr obj(texts);
-    obj.solve();
-    obj.print_results();
+//    MultipleLongestCommonSubstr obj(texts);
+//    obj.PrintResults();
+    FileLCSWrapper flcsw("/home/mdc/CLionProjects/logest_common_substring/samples");
 
     return 0;
 }
