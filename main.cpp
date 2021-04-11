@@ -2,8 +2,8 @@
 #include "FileLCSWrapper.h"
 
 int main() {
-    auto start = std::chrono::high_resolution_clock::now();
     FileLCSWrapper flcsw("/home/mdc/CLionProjects/logest_common_substring/samples");
+    auto start = std::chrono::high_resolution_clock::now();
     flcsw.RunAndDisplay();
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = duration_cast<std::chrono::milliseconds>(stop - start);

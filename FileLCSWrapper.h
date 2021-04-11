@@ -1,7 +1,3 @@
-//
-// Created by mdc on 11.04.21.
-//
-
 #ifndef LOGEST_COMMON_SUBSTRING_FILELCSWRAPPER_H
 #define LOGEST_COMMON_SUBSTRING_FILELCSWRAPPER_H
 #define MUST_BE_DIRECTORY 0
@@ -24,7 +20,12 @@
 #include <map>
 #include "MultipleLongestCommonSubstring.h"
 
-
+/**
+ * Checks that a path is valid
+ * and that the referenced obejct is a file or a directory
+ * @param path String path to verify
+ * @param dir_or_file MUST_BE_DIRECTORY or MUST_BE_FILE
+ */
 void CheckPathExist(const std::string &path, uint8_t dir_or_file) {
     struct stat buffer{};
     int res = stat(path.c_str(), &buffer);
@@ -35,6 +36,10 @@ void CheckPathExist(const std::string &path, uint8_t dir_or_file) {
     }
 }
 
+/**
+ * This class uses MultipleLongestCommonSubstring
+ * to find the lognest common substrings in multiple files, from a given directory.
+ */
 class FileLCSWrapper final {
 private:
     std::string _path_to_dir;
@@ -42,6 +47,10 @@ private:
     std::vector<std::vector<int>> _lst_of_binaries;
     std::tuple<int, std::vector<std::map<int, int>>> _results;
 
+    /**
+     * List all files in directory and save their paths in _paths_to_files
+     * If the list is empty, exit with error.
+     */
     void ReadFilesInDirectory() {
         for (const auto &file : std::filesystem::directory_iterator(_path_to_dir)) {
             _paths_to_files.push_back(file.path());
@@ -53,6 +62,10 @@ private:
         }
     }
 
+    /**
+     * Saves the content of a file in a vector of int and stores it in _lst_of_binaries
+     * @param path_to_file
+     */
     void ReadFile(const std::string &path_to_file) {
         CheckPathExist(path_to_file, MUST_BE_FILE);
         std::ifstream testFile(path_to_file, std::ios::binary);
@@ -64,10 +77,14 @@ private:
         _lst_of_binaries.push_back(fileContents);
     }
 
-    void PerformSearch() {
+    /**
+     * Runs the research of the longest substrings
+     */
+    void PerformSearchOfLongestSubstrings() {
         MultipleLongestCommonSubstr<int> obj(_lst_of_binaries);
         _results = obj.ComputeResultsStats();
     }
+
 
     void DisplayResults() const {
         int length = std::get<0>(_results);
@@ -88,9 +105,12 @@ public:
         _path_to_dir = pathToDir;
     }
 
+    /**
+     * Main method
+     */
     void RunAndDisplay() {
         ReadFilesInDirectory();
-        PerformSearch();
+        PerformSearchOfLongestSubstrings();
         DisplayResults();
     }
 };

@@ -1,12 +1,9 @@
 //
-// https://github.com/juliobg/SAIS/blob/master/main.cpp
+// From https://github.com/juliobg/SAIS/blob/master/main.cpp
 //
 
 #ifndef LOGEST_COMMON_SUBSTRING_SUFFIXARRAY_H
 #define LOGEST_COMMON_SUBSTRING_SUFFIXARRAY_H
-
-#ifndef SAIS_H
-#define SAIS_H
 
 #include <type_traits>
 #include <vector>
@@ -198,8 +195,5 @@ std::vector<int> ComputeSuffixArray(const T &data,
 
     return result;
 }
-
-#endif // SAIS_H
-
 
 #endif //LOGEST_COMMON_SUBSTRING_SUFFIXARRAY_H
