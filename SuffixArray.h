@@ -81,7 +81,7 @@ std::vector<int> induce_lms(T &data, const std::vector<suffix_type> &types,
     reset_head_tails(buckets);
     std::vector<int> guess(data.size() + 1, -1);
 
-    for (std::size_t i = 0; i < data.size(); i++) {
+    for (std::size_t i = 0; i < data.size(); ++i) {
         if (is_lms_char(i, types)) {
             const std::size_t index = MAKE_UNSIGNED(data[i]);
             guess[buckets[index].tail--] = i;
@@ -99,7 +99,7 @@ void induce_LS_sort(const T &data, const std::vector<suffix_type> &types,
     for (auto &&index : guess) {
         if (index != -1) {
             auto j = index - 1;
-            if (j >= 0 && types[j] == suffix_type::L) {
+            if (j >= 0 && types[static_cast<unsigned long>(j)] == suffix_type::L) {
                 const std::size_t bucket_index = MAKE_UNSIGNED(data[MAKE_UNSIGNED(j)]);
                 guess[buckets[bucket_index].head++] = j;
             }
@@ -116,7 +116,7 @@ void induce_S_sort(const T &data, const std::vector<suffix_type> &types,
         int index = guess[i];
         if (index != -1) {
             auto j = index - 1;
-            if (j >= 0 && types[j] == suffix_type::S) {
+            if (j >= 0 && types[static_cast<unsigned long>(j)] == suffix_type::S) {
                 const std::size_t bucket_index = MAKE_UNSIGNED(data[MAKE_UNSIGNED(j)]);
                 guess[buckets[bucket_index].tail--] = j;
             }
@@ -133,7 +133,7 @@ auto reduce(const T &data, const std::vector<suffix_type> &types,
 
     lms_names[MAKE_UNSIGNED(guess[0])] = current_name;
     last_lms_suffix = guess[0];
-    for (std::size_t i = 1; i < guess.size(); i++) {
+    for (std::size_t i = 1; i < guess.size(); ++i) {
         std::size_t suffix_offset = MAKE_UNSIGNED(guess[i]);
         if (is_lms_char(suffix_offset, types)) {
             if (!lms_substrings_equal(data, types, last_lms_suffix, suffix_offset))
@@ -144,7 +144,7 @@ auto reduce(const T &data, const std::vector<suffix_type> &types,
         }
     }
 
-    for (std::size_t i = 0; i < lms_names.size(); i++)
+    for (std::size_t i = 0; i < lms_names.size(); ++i)
         if (lms_names[i] != -1) {
             summary_sufix_offsets.push_back(i);
             summary_string.push_back(lms_names[i]);

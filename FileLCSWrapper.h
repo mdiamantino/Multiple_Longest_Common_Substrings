@@ -4,6 +4,8 @@
 
 #ifndef LOGEST_COMMON_SUBSTRING_FILELCSWRAPPER_H
 #define LOGEST_COMMON_SUBSTRING_FILELCSWRAPPER_H
+#define MUST_BE_DIRECTORY 0
+#define MUST_BE_FILE 1
 
 #include<string>
 #include <utility>
@@ -22,25 +24,37 @@
 #include <map>
 #include "MultipleLongestCommonSubstring.h"
 
-class FileLCSWrapper {
+
+void CheckPathExist(const std::string &path, uint8_t dir_or_file) {
+    struct stat buffer{};
+    int res = stat(path.c_str(), &buffer);
+    if (res != 0 || (dir_or_file == MUST_BE_DIRECTORY && !S_ISDIR(buffer.st_mode)) ||
+        (dir_or_file == MUST_BE_FILE && !S_ISREG(buffer.st_mode))) {
+        std::cout << "[!] Invalid path : " << path << std::endl;
+        exit(1);
+    }
+}
+
+class FileLCSWrapper final {
 private:
     std::string _path_to_dir;
     std::vector<std::string> _paths_to_files;
     std::vector<std::vector<int>> _lst_of_binaries;
-
-    static bool IsPathExist(const std::string &s) {
-        struct stat buffer{};
-        return (stat(s.c_str(), &buffer) == 0);
-    }
+    std::tuple<int, std::vector<std::map<int, int>>> _results;
 
     void ReadFilesInDirectory() {
         for (const auto &file : std::filesystem::directory_iterator(_path_to_dir)) {
             _paths_to_files.push_back(file.path());
             ReadFile(file.path());
         }
+        if (_paths_to_files.empty()) {
+            std::cout << "[!] The directory does not contain any file." << std::endl;
+            exit(1);
+        }
     }
 
     void ReadFile(const std::string &path_to_file) {
+        CheckPathExist(path_to_file, MUST_BE_FILE);
         std::ifstream testFile(path_to_file, std::ios::binary);
         std::vector<int, std::allocator<int>> fileContents;
         const unsigned long fileSize = std::filesystem::file_size(path_to_file);
@@ -52,9 +66,12 @@ private:
 
     void PerformSearch() {
         MultipleLongestCommonSubstr<int> obj(_lst_of_binaries);
-        auto results = obj.ComputeResultsStats();
-        int length = std::get<0>(results);
-        std::vector<std::map<int, int>> different_results = std::get<1>(results);
+        _results = obj.ComputeResultsStats();
+    }
+
+    void DisplayResults() const {
+        int length = std::get<0>(_results);
+        std::vector<std::map<int, int>> different_results = std::get<1>(_results);
         for (const std::map<int, int> &map_file_num_offset : different_results) {
             std::cout << "Longest substring found : \n\tLength : " << length << "\n\tFound in :";
             for (const auto&[file_num, offset] : map_file_num_offset) {
@@ -67,15 +84,14 @@ private:
 
 public:
     explicit FileLCSWrapper(const std::string &pathToDir) {
-        if (!IsPathExist(pathToDir)) {
-            std::cout << "Invalid path." << std::endl;
-            return;
-        } else {
-            _path_to_dir = pathToDir;
-            ReadFilesInDirectory();
-            PerformSearch();
-//            ReadFile("/home/mdc/CLionProjects/logest_common_substring/samples/sample.3");
-        }
+        CheckPathExist(pathToDir, MUST_BE_DIRECTORY);
+        _path_to_dir = pathToDir;
+    }
+
+    void RunAndDisplay() {
+        ReadFilesInDirectory();
+        PerformSearch();
+        DisplayResults();
     }
 };
 

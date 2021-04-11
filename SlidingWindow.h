@@ -5,7 +5,7 @@
 #include <vector>
 #include <deque>
 
-class SlidingWindow {
+class SlidingWindow final{
 private:
     std::vector<int> const _lcp_array;
     int _lowest_value, _highest_value;
@@ -28,7 +28,7 @@ public:
         while (!_window_deque.empty() && _window_deque.front() < _lowest_value) _window_deque.pop_front();
     }
 
-    int ExtractMin() {
+    [[nodiscard]] int ExtractMin() const {
         return _lcp_array[_window_deque.front()];
     }
 };

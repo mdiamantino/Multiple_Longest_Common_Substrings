@@ -7,10 +7,10 @@ std::vector<int> ComputeLongestCommonPrefix(const std::vector <T> &word, const s
     int number_of_suffixes = suffix_array.size();
     // Building inverse of the suffix array
     std::vector<int> rank(number_of_suffixes, 0);
-    for (int i = 0; i < number_of_suffixes; i++) rank[suffix_array[i]] = i;
+    for (std::size_t i = 0; i < number_of_suffixes; ++i) rank[suffix_array[i]] = i;
 
     std::vector<int> longest_common_prefix(number_of_suffixes, 0);
-    for (int i = 0, len = 0; i < number_of_suffixes; i++) {
+    for (std::size_t i = 0, len = 0; i < number_of_suffixes; ++i) {
         if (rank[i] > 0) {
             int k = suffix_array[rank[i] - 1];
             while ((i + len < number_of_suffixes) && (k + len < number_of_suffixes) &&

@@ -15,7 +15,7 @@
 #include "SuffixArray.h"
 
 template<typename T>
-class MultipleLongestCommonSubstr {
+class MultipleLongestCommonSubstr final {
 
 private:
     std::vector<std::vector<T>> _files_arrays;
@@ -29,29 +29,29 @@ private:
     std::vector<int> _combined_text;
     std::unordered_map<int, int> _type_from_char_pos;
     std::vector<std::tuple<int, int, int>> _longest_comon_substrings_indices;
+    std::vector<int> _lcp_array;
 
     void InitializeTextProperties() {
         std::set<T> char_map;
         _n_sentinels = _files_arrays.size();
-        for (int i = 0, char_type = 0; i < _n_sentinels; i++) {
+        for (std::size_t i = 0, char_type = 0; i < _n_sentinels; ++i) {
             std::vector<T> curr_txt = _files_arrays[i];
             int curr_txt_size = curr_txt.size();
             _text_length += curr_txt_size;
-            for (int c = 0; c < curr_txt_size; c++) {
+            for (std::size_t c = 0; c < curr_txt_size; ++c) {
                 char_map.insert(curr_txt[c]);
                 _type_from_char_pos[char_type++] = i;
             }
             _type_from_char_pos[char_type++] = i;
         }
         _text_length += _n_sentinels; // Total text length also include sentinels (Eg. {ab,er,zer} -> ab$er!zer&)
-        _alphabet_length = (int) char_map.size() + _n_sentinels;
+        _alphabet_length = char_map.size() + _n_sentinels;
         _min_symbol_value = *char_map.begin();
         _shift = _n_sentinels - _min_symbol_value;
     }
 
     void BuildCombinedText() {
-        int i;
-        for (i = 0; i < _n_sentinels; i++) {
+        for (std::size_t i = 0; i < _n_sentinels; ++i) {
             for (auto &chr : _files_arrays[i]) {
                 _combined_text.push_back(chr + _shift);
             }
@@ -61,7 +61,7 @@ private:
 
     bool IsKDifferentTypesInWindow(std::set<int> &types_in_current_window, int lowest_index, int highest_index) {
         types_in_current_window.clear();
-        for (int i = lowest_index; i <= highest_index; i++) {
+        for (auto i = lowest_index; i <= highest_index; ++i) {
             types_in_current_window.insert(_type_from_char_pos[_sarray[i]]);
         }
         return types_in_current_window.size() >= _k;
@@ -71,23 +71,23 @@ private:
         InitializeTextProperties();
         BuildCombinedText();
         _sarray = ComputeSuffixArray(_combined_text, _alphabet_length);
-        std::vector<int> lcp_array = ComputeLongestCommonPrefix(_combined_text, _sarray);
-        RunSlidingWindow(lcp_array);
+        _lcp_array = ComputeLongestCommonPrefix(_combined_text, _sarray);
+        RunSlidingWindow();
     }
 
     int ConvertPositionInCombinedTextToPosInString(int string_num, int index_in_combined_text) {
         int i = 0;
         while (_type_from_char_pos[i] != string_num) {
-            i++;
+            ++i;
         }
         assert(index_in_combined_text >= i);
         return index_in_combined_text - i;
     }
 
-    void RunSlidingWindow(const std::vector<int> &lcp_array) {
+    void RunSlidingWindow() {
         std::set<int> types_in_current_window;
         int lowest_index = _n_sentinels, highest_index = lowest_index;
-        SlidingWindow sliding_window(lcp_array, lowest_index + 1, highest_index + 1);
+        SlidingWindow sliding_window(_lcp_array, lowest_index + 1, highest_index + 1);
         int current_longest_length = INT32_MIN;
         while (true) {
             bool shrinkWindow =
@@ -124,17 +124,17 @@ public:
         FindMostCommonSubStrings();
     }
 
-    std::tuple<int, std::vector<std::map<int,int>>> ComputeResultsStats() {
+    std::tuple<int, std::vector<std::map<int, int>>> ComputeResultsStats() {
         // For each longest substring
-        std::tuple<int, std::vector<std::map<int,int>>> results;
-        std::vector<std::map<int,int>> results_string_type_offset;
+        std::tuple<int, std::vector<std::map<int, int>>> results;
+        std::vector<std::map<int, int>> results_string_type_offset;
         int length;
         for (std::tuple<int, int, int> indices : _longest_comon_substrings_indices) {
             int lowest_index = std::get<0>(indices);
             int highest_index = std::get<1>(indices);
             length = std::get<2>(indices);
             std::map<int, int> map_file_offset;
-            for (int i = lowest_index; i <= highest_index; i++) {
+            for (size_t i = lowest_index; i <= highest_index; ++i) {
                 int type = _type_from_char_pos[_sarray[i]];
                 if (map_file_offset.find(type) == map_file_offset.end()) {
                     int offset = ConvertPositionInCombinedTextToPosInString(type, _sarray[i]);
@@ -147,7 +147,7 @@ public:
         return results;
     }
 
-    void PrintResults() {
+    [[maybe_unused]] void PrintResults() {
         for (std::tuple<int, int, int> indices : _longest_comon_substrings_indices) {
             int lowest_index = std::get<0>(indices);
             int length = std::get<2>(indices);
@@ -155,8 +155,8 @@ public:
             word.reserve(length);
             int i = _sarray[lowest_index];
             std::cout << length << std::endl;
-            for (int j = 0; j < length; j++) {
-                word.push_back((char) (_combined_text[i + j] - _shift));
+            for (std::size_t j = 0; j < length; ++j) {
+                word.push_back((_combined_text[i + j] - _shift));
             }
             std::string string(word.begin(), word.end());
             std::cout << string << std::endl;
