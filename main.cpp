@@ -2,6 +2,7 @@
 #include "FileLCSWrapper.h"
 
 int main() {
+
     std::vector<std::vector<char>> texts;
 
     std::string w1 = "AABC";
@@ -22,7 +23,7 @@ int main() {
 
 //    MultipleLongestCommonSubstr obj(texts);
 //    obj.PrintResults();
-    FileLCSWrapper flcsw("/home/mdc/CLionProjects/logest_common_substring/samples");
 
+    FileLCSWrapper flcsw("/home/mdc/CLionProjects/logest_common_substring/samples");
     return 0;
 }

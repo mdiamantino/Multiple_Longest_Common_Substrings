@@ -12,6 +12,14 @@
 #include <sys/stat.h>
 #include <iostream>
 #include <fstream>
+#include <utility>
+#include <vector>
+#include <set>
+#include <unordered_map>
+#include <stack>
+#include <cassert>
+#include <iostream>
+#include <map>
 #include "MultipleLongestCommonSubstring.h"
 
 class FileLCSWrapper {
@@ -41,13 +49,24 @@ private:
                             std::istreambuf_iterator<char>());
         _lst_of_binaries.push_back(fileContents);
     }
-    
+
     void PerformSearch() {
         MultipleLongestCommonSubstr<int> obj(_lst_of_binaries);
+        auto results = obj.ComputeResultsStats();
+        int length = std::get<0>(results);
+        std::vector<std::map<int, int>> different_results = std::get<1>(results);
+        for (const std::map<int, int> &map_file_num_offset : different_results) {
+            std::cout << "Longest substring found : \n\tLength : " << length << "\n\tFound in :";
+            for (const auto&[file_num, offset] : map_file_num_offset) {
+                std::cout << "\n\t\t" << _paths_to_files[file_num] << " - Offset (# bytes) : " << offset << " (0x"
+                          << std::hex << offset << ")." << std::dec;
+            }
+            std::cout << std::endl;
+        }
     }
 
 public:
-    explicit FileLCSWrapper(const std::string& pathToDir) {
+    explicit FileLCSWrapper(const std::string &pathToDir) {
         if (!IsPathExist(pathToDir)) {
             std::cout << "Invalid path." << std::endl;
             return;

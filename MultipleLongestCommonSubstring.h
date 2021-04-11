@@ -7,10 +7,12 @@
 #include <set>
 #include <unordered_map>
 #include <stack>
+#include <cassert>
 #include <iostream>
+#include <map>
 #include "LongestCommonPrefix.h"
 #include "SlidingWindow.h"
-#include "SAIS2.h"
+#include "SuffixArray.h"
 
 template<typename T>
 class MultipleLongestCommonSubstr {
@@ -26,7 +28,7 @@ private:
     std::vector<int> _sarray{};
     std::vector<int> _combined_text;
     std::unordered_map<int, int> _type_from_char_pos;
-    std::vector<std::tuple<int, int>> _longest_comon_substrings_indices;
+    std::vector<std::tuple<int, int, int>> _longest_comon_substrings_indices;
 
     void InitializeTextProperties() {
         std::set<T> char_map;
@@ -62,24 +64,28 @@ private:
         for (int i = lowest_index; i <= highest_index; i++) {
             types_in_current_window.insert(_type_from_char_pos[_sarray[i]]);
         }
-        return types_in_current_window.size() == _k;
+        return types_in_current_window.size() >= _k;
     }
 
     void FindMostCommonSubStrings() {
-        std::set<int> types_in_current_window;
         InitializeTextProperties();
         BuildCombinedText();
-//        std::ofstream fout("/home/mdc/CLionProjects/logest_common_substring/combined.txt", std::ios::out | std::ios::binary);
-//        fout.write(reinterpret_cast<const char*>(&_combined_text[0]), _combined_text.size() * sizeof(char));
-//        fout.close();
-//        int* SA = static_cast<int *>(malloc(sizeof(int *) * _text_length));
-//        SA_IS(reinterpret_cast<unsigned char *>(&_combined_text[0]),SA,_text_length,_k,sizeof(unsigned char));
-        _sarray = sais_suffix_array(_combined_text, _alphabet_length);
-//        SuffixArray sa(_sarray, _combined_text, _alphabet_length);
-
+        _sarray = ComputeSuffixArray(_combined_text, _alphabet_length);
         std::vector<int> lcp_array = ComputeLongestCommonPrefix(_combined_text, _sarray);
+        RunSlidingWindow(lcp_array);
+    }
 
+    int ConvertPositionInCombinedTextToPosInString(int string_num, int index_in_combined_text) {
+        int i = 0;
+        while (_type_from_char_pos[i] != string_num) {
+            i++;
+        }
+        assert(index_in_combined_text >= i);
+        return index_in_combined_text - i;
+    }
 
+    void RunSlidingWindow(const std::vector<int> &lcp_array) {
+        std::set<int> types_in_current_window;
         int lowest_index = _n_sentinels, highest_index = lowest_index;
         SlidingWindow sliding_window(lcp_array, lowest_index + 1, highest_index + 1);
         int current_longest_length = INT32_MIN;
@@ -96,7 +102,7 @@ private:
             }
             if (lowest_index == _text_length - 1) break;
             if (lowest_index != highest_index ||
-                !IsKDifferentTypesInWindow(types_in_current_window, lowest_index, highest_index)) {
+                IsKDifferentTypesInWindow(types_in_current_window, lowest_index, highest_index)) {
                 int min_lcp = sliding_window.ExtractMin();
                 if (min_lcp > 0) {
                     if (min_lcp > current_longest_length) {
@@ -106,7 +112,7 @@ private:
                     }
                     if (min_lcp == current_longest_length) {
                         // Another substring of same length of the previous longest substring is found
-                        _longest_comon_substrings_indices.emplace_back(lowest_index, min_lcp);
+                        _longest_comon_substrings_indices.emplace_back(lowest_index, highest_index, min_lcp);
                     }
                 }
             }
@@ -118,13 +124,38 @@ public:
         FindMostCommonSubStrings();
     }
 
+    std::tuple<int, std::vector<std::map<int,int>>> ComputeResultsStats() {
+        // For each longest substring
+        std::tuple<int, std::vector<std::map<int,int>>> results;
+        std::vector<std::map<int,int>> results_string_type_offset;
+        int length;
+        for (std::tuple<int, int, int> indices : _longest_comon_substrings_indices) {
+            int lowest_index = std::get<0>(indices);
+            int highest_index = std::get<1>(indices);
+            length = std::get<2>(indices);
+            std::map<int, int> map_file_offset;
+            for (int i = lowest_index; i <= highest_index; i++) {
+                int type = _type_from_char_pos[_sarray[i]];
+                if (map_file_offset.find(type) == map_file_offset.end()) {
+                    int offset = ConvertPositionInCombinedTextToPosInString(type, _sarray[i]);
+                    map_file_offset[type] = offset;
+                }
+            }
+            results_string_type_offset.push_back(map_file_offset);
+        }
+        results = std::make_tuple(length, results_string_type_offset);
+        return results;
+    }
 
     void PrintResults() {
-        for (std::tuple<int, int> indices : _longest_comon_substrings_indices) {
+        for (std::tuple<int, int, int> indices : _longest_comon_substrings_indices) {
+            int lowest_index = std::get<0>(indices);
+            int length = std::get<2>(indices);
             std::vector<char> word;
-            word.reserve(std::get<1>(indices));
-            int i = _sarray[std::get<0>(indices)];
-            for (int j = 0; j < std::get<1>(indices); j++) {
+            word.reserve(length);
+            int i = _sarray[lowest_index];
+            std::cout << length << std::endl;
+            for (int j = 0; j < length; j++) {
                 word.push_back((char) (_combined_text[i + j] - _shift));
             }
             std::string string(word.begin(), word.end());
