@@ -42,10 +42,10 @@ void CheckPathExist(const std::string &path, uint8_t dir_or_file) {
  */
 class FileLCSWrapper final {
 private:
-    std::string _path_to_dir;
-    std::vector<std::string> _paths_to_files;
-    std::vector<std::vector<int>> _lst_of_binaries;
-    std::tuple<int, std::vector<std::map<int, int>>> _results;
+    std::string _path_to_dir{};
+    std::vector<std::string> _paths_to_files{};
+    std::vector<std::vector<int>> _lst_of_binaries{};
+    std::tuple<int, std::vector<std::map<int, int>>> _results{};
 
     /**
      * List all files in directory and save their paths in _paths_to_files
@@ -80,29 +80,34 @@ private:
     /**
      * Runs the research of the longest substrings
      */
-    void PerformSearchOfLongestSubstrings() {
+    void PerformSearchOfLongestCommonSubstrings() {
         MultipleLongestCommonSubstr<int> obj(_lst_of_binaries);
-        _results = obj.ComputeResultsStats();
+        _results = obj.GetResultsStats();
     }
 
 
-    void DisplayResults() const {
+    void DisplayResults()  {
         int length = std::get<0>(_results);
+        if (length == 0) {
+            std::cout << "No longst common substring found !" << std::endl;
+            exit(0);
+        }
         std::vector<std::map<int, int>> different_results = std::get<1>(_results);
         for (const std::map<int, int> &map_file_num_offset : different_results) {
-            std::cout << "Longest substring found : \n\tLength : " << length << "\n\tFound in :";
+            std::cout << "Longest common substring found : \n\tLength : " << length << "\n\tPresent in files :";
             for (const auto&[file_num, offset] : map_file_num_offset) {
                 std::cout << "\n\t\t" << _paths_to_files[file_num] << " - Offset (# bytes) : " << offset << " (0x"
                           << std::hex << offset << ")." << std::dec;
             }
-            std::cout << std::endl;
+            std::cout << "\n" << std::endl;
         }
     }
 
 public:
     explicit FileLCSWrapper(const std::string &pathToDir) {
-        CheckPathExist(pathToDir, MUST_BE_DIRECTORY);
-        _path_to_dir = pathToDir;
+        std::string abs_path = std::filesystem::absolute(pathToDir);
+        CheckPathExist(abs_path, MUST_BE_DIRECTORY);
+        _path_to_dir = abs_path;
     }
 
     /**
@@ -110,7 +115,7 @@ public:
      */
     void RunAndDisplay() {
         ReadFilesInDirectory();
-        PerformSearchOfLongestSubstrings();
+        PerformSearchOfLongestCommonSubstrings();
         DisplayResults();
     }
 };

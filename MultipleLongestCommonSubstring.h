@@ -183,7 +183,7 @@ public:
      *      hashmap[(file1_containing_substring, offset_in_file1), (file2_containing_substring, offset_in_file2), ...]
      * Note that the length is the same - if there are multiple results.
      */
-    std::tuple<int, std::vector<std::map<int, int>>> ComputeResultsStats() {
+    std::tuple<int, std::vector<std::map<int, int>>> GetResultsStats() {
         // For each longest substring
         std::tuple<int, std::vector<std::map<int, int>>> results;
         std::vector<std::map<int, int>> results_string_type_offset;
@@ -222,6 +222,9 @@ public:
             }
             std::string string(word.begin(), word.end());
             std::cout << string << std::endl;
+        }
+        if (_longest_comon_substrings_indices.empty()) {
+            std::cout << "No longst common substring found !" << std::endl;
         }
     }
 };
