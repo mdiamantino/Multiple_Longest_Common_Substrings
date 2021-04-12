@@ -56,8 +56,8 @@ private:
             _paths_to_files.push_back(file.path());
             ReadFile(file.path());
         }
-        if (_paths_to_files.empty()) {
-            std::cout << "[!] The directory does not contain any file." << std::endl;
+        if (_paths_to_files.size() < 2) {
+            std::cout << "[!] The directory should contain at least two files." << std::endl;
             exit(1);
         }
     }
@@ -89,12 +89,12 @@ private:
     void DisplayResults()  {
         int length = std::get<0>(_results);
         if (length == 0) {
-            std::cout << "No longst common substring found !" << std::endl;
+            std::cout << "No longst common strand of bytes found !" << std::endl;
             exit(0);
         }
         std::vector<std::map<int, int>> different_results = std::get<1>(_results);
         for (const std::map<int, int> &map_file_num_offset : different_results) {
-            std::cout << "Longest common substring found : \n\tLength : " << length << "\n\tPresent in files :";
+            std::cout << "Longest common strand of bytes found : \n\tLength : " << length << "\n\tPresent in files :";
             for (const auto&[file_num, offset] : map_file_num_offset) {
                 std::cout << "\n\t\t" << _paths_to_files[file_num] << " - Offset (# bytes) : " << offset << " (0x"
                           << std::hex << offset << ")." << std::dec;
