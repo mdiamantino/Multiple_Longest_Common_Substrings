@@ -2,13 +2,13 @@
 
 ## About
 
-* **Problem :** Given at least two strings, find the longest common substring(s) - Note: there can be many of same
+* **Problem :** Given at least two strings, find the longest common substring(s) - Note: there can be many of the same
   length.
-* **This solution** has a O(n) time complexity. This is achieved via suffix arrays, longest common prefix arrays and
+* **This solution** has an O(n) time complexity. This is achieved via suffix arrays, longest common prefix arrays, and
   sliding windows.
 * **Clarifications :** The project can be executed as:
-    * Command line program : to find the longest common strand of bytes between *n* files in a specified directory;
-    * An API to use the algorithm with any vector of strings (or vector of characters, or integers).
+    * Command-line program: to find the longest common strand of bytes between *n* files in a specified directory;
+    * An API to use the algorithm with any vector of strings (or vector of characters or integers).
 
 ## Installation
 
@@ -41,7 +41,7 @@
 ### As Command Line Program
 
 * **Prerequisites :**
-    * A valid path to a non empty directory
+    * A valid path to a non-empty directory
         * The directory must contain **at least two files.**
         * The directory cannot contain subdirectories.
 
@@ -74,7 +74,7 @@
    * where res is of the form: `hashmap[(file1_containing_substring, offset_in_file1), (file2_containing_substring, offset_in_file2), ...]`.
 
 ### Algorithm
-1. Combine all strings in one strings and use separators (sentinels).
+1. Combine all strings in one string and use separators (sentinels).
 2. Compute the suffix array
 3. Compute the longest common prefix array
 4. Use a sliding window to capture at least K >= 2 suffixes
