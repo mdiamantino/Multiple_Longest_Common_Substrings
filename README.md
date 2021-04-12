@@ -1,4 +1,4 @@
-# Linear Multiple Longest Common Substring -  C++
+# Linear Multiple Longest Common Substring ( C++ implementation )
 
 ## About
 
