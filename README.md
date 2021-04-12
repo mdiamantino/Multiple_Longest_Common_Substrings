@@ -29,7 +29,7 @@
    ```
 3. Run CMake
    ```sh
-   $ ccmake . 
+   $ cmake . 
    ```
 4. Compile
    ```sh
