@@ -26,7 +26,7 @@ class MultipleLongestCommonSubstr final {
 private:
     std::vector<std::vector<T>> _files_arrays;
     int _alphabet_length = 256;
-    int _n_sentinels{}; // A sentinel is a special 'cacters' palced at the end of each string
+    int _n_sentinels{}; // A sentinel is a special symbol palced at the end of each string
     int _text_length{};
     int _shift{};
     int _k = 2;
