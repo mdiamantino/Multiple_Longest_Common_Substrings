@@ -207,7 +207,7 @@ public:
     }
 
     /**
-     * Displays the longest substrings found.
+     * Displays found longest substrings.
      */
     [[maybe_unused]] void PrintResults() {
         for (std::tuple<int, int, int> indices : _longest_comon_substrings_indices) {
